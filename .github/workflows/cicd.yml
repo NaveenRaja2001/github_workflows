@@ -21,8 +21,8 @@ jobs:
       - name: CheckOut Repository
         uses: actions/checkout@v2
 
-      - name: Set up Node.js version ---${{ matrix.node-version }}
-        uses: actions/setup-node@v2
+      - name: Set up Node.js version
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
 
@@ -35,7 +35,7 @@ jobs:
         working-directory: exercise
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: dist-node${{ matrix.node-version }}
           path: exercise/dist
@@ -51,8 +51,8 @@ jobs:
       - name: CheckOut Repository
         uses: actions/checkout@v2
 
-      - name: Set up Node.js version ---${{ matrix.node-version }}
-        uses: actions/setup-node@v2
+      - name: Set up Node.js version
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
 
@@ -69,10 +69,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download artifact from Node 18
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: dist-node18
-          path:  exercise/dist
+          path: exercise/dist
 
       - name: Build and push Docker image
         env:
