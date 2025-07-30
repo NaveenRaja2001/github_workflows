@@ -27,11 +27,71 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Install Dependencies
-        run: npm install
+        run: npm ci
         working-directory: exercise
 
       - name: Compile TypeScript
         run: npm run build
         working-directory: exercise
 
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: dist-node${{ matrix.node-version }}
+          path: exercise/dist
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [14, 16]
+    
+    steps:
+      - name: CheckOut Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js version ---${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install Dependencies
+        run: npm ci
+        working-directory: exercise
+
+      - name: Run Tests
+        run: npm test
+        working-directory: exercise
+
+  docker:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact from Node 18
+        uses: actions/download-artifact@v2
+        with:
+          name: dist-node18
+          path:  exercise/dist
+
+      - name: Build and push Docker image
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+          docker build -t $DOCKER_USERNAME/your-app:latest .
+          docker push $DOCKER_USERNAME/your-app:latest
   
+  deploy:
+    needs: docker
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
+    environment:
+      name: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
+
+    steps:
+      - name: Print environment variables
+        run: |
+          echo "API_URL=${{ vars.API_URL }}"
+          echo "DB_NAME=${{ vars.DB_NAME }}"
