@@ -80,10 +80,7 @@ jobs:
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
           echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-            cd ..
-            echo $PWD
-            cd exercise
-            echo $PWD
+           ls -l exercise
           docker build -t $DOCKER_USERNAME/your-app:latest exercise
           docker push $DOCKER_USERNAME/your-app:latest
   
