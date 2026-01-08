@@ -1,0 +1,28 @@
+{
+  "name": "jira-gherkin-converter",
+  "version": "1.0.0",
+  "description": "A Forge app that converts Jira ticket descriptions to Gherkin scripts when moved to Code Review",
+  "main": "src/index.js",
+  "scripts": {
+    "deploy": "forge deploy",
+    "install": "forge install",
+    "lint": "eslint src/",
+    "test": "echo \"Error: no tests specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "keywords": [
+    "atlassian",
+    "forge",
+    "jira",
+    "gherkin",
+    "bdd",
+    "test automation"
+  ],
+  "dependencies": {
+    "@forge/api": "^2.0.0"
+  },
+  "devDependencies": {
+    "@forge/cli": "^1.8.0"
+  }
+}
