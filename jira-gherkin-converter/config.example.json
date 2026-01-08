@@ -1,0 +1,33 @@
+{
+  "appName": "jira-gherkin-converter",
+  "description": "Jira ticket to Gherkin converter",
+  "externalAppUrl": "https://your-python-app-url.com/convert",
+  "triggerStatus": "Code Review",
+  "customField": {
+    "name": "Gherkin Script",
+    "id": "customfield_gherkin",  // This needs to be updated with actual field ID
+    "description": "Converted Gherkin script from ticket description"
+  },
+  "requiredFields": [
+    "summary",
+    "description",
+    "status",
+    "project",
+    "assignee",
+    "reporter"
+  ],
+  "dataMapping": {
+    "issueId": "{{context.issue.id}}",
+    "issueKey": "{{context.issue.key}}",
+    "summary": "{{context.issue.fields.summary}}",
+    "description": "{{context.issue.fields.description}}",
+    "status": "{{context.issue.fields.status.name}}",
+    "projectKey": "{{context.issue.fields.project.key}}",
+    "assignee": "{{context.issue.fields.assignee.displayName}}",
+    "reporter": "{{context.issue.fields.reporter.displayName}}"
+  },
+  "responseHandling": {
+    "successComment": "Gherkin conversion result: {{response.body.convertedGherkin}}",
+    "errorHandling": "Log error and continue"
+  }
+}

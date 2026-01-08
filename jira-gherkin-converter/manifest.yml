@@ -1,0 +1,67 @@
+# Atlassian Forge app manifest
+version: 1
+name: jira-gherkin-converter
+description: Jira ticket to Gherkin converter
+key: jira-gherkin-converter
+app: {}
+modules:
+  # Webhook that triggers when an issue transitions to "Code Review" status
+  - key: jira-issue-transition-webhook
+    function: handle-issue-transition
+    resolver:
+      type: jira:issue-transition-webhook
+      # Note: This is a simplified configuration - actual status names may vary
+      # depending on your Jira setup
+      rule:
+        condition: 
+          - type: jira.issue.status.category.changed
+          - type: jira.issue.status.name.changed
+            value: "Code Review"
+  # Function that handles the webhook and calls external Python app
+  - key: handle-issue-transition
+    type: function
+    function:
+      handler: index.handler
+    dependencies:
+      - type: web-request
+        key: call-python-app
+  # Web request configuration to call external Python application
+  - key: call-python-app
+    type: web-request
+    properties:
+      url: '{{{externalAppUrl}}}'  # This will be configured in the app settings
+      method: POST
+      headers:
+        - Content-Type: application/json
+      body: |
+        {
+          "issueId": "{{context.issue.id}}",
+          "issueKey": "{{context.issue.key}}",
+          "summary": "{{context.issue.fields.summary}}",
+          "description": "{{context.issue.fields.description}}",
+          "status": "{{context.issue.fields.status.name}}",
+          "projectKey": "{{context.issue.fields.project.key}}",
+          "assignee": "{{context.issue.fields.assignee.displayName}}",
+          "reporter": "{{context.issue.fields.reporter.displayName}}"
+        }
+      # Optionally handle the response from your Python app
+      response:
+        # Save the converted Gherkin to a custom field or comment
+        - type: jira:issue-comment
+          text: "Gherkin conversion result: {{response.body.convertedGherkin}}"
+
+# Add a custom field to store the converted Gherkin if needed
+  - key: gherkin-field
+    type: jira:issue-field
+    properties:
+      name: Gherkin Script
+      description: Converted Gherkin script from ticket description
+      type: textarea
+
+# Permissions required by the app
+permissions:
+  - key: jira:issue:read
+  - key: jira:issue:write
+  - key: web-request
+  - key: extension:run
+  - key: product:jira
